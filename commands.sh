@@ -2,7 +2,7 @@
 ## pip install -U cookiecutter
     # cookiecutter https://github.com/audreyfeldroy/cookiecutter-pypackage.git
 
-## Upload to pypi
+## Upload to pypi (navigate to right dir)
     # python setup.py sdist
     # twine upload dist/*
 

@@ -15,9 +15,9 @@ requirements = [
     "pybedtools==0.8.1"
 ]
 
-setup_requirements = ['pytest-runner', ]
+setup_requirements = [ ]
 
-test_requirements = ['pytest>=3', ]
+test_requirements = [ ]
 
 setup(
     author="Tom Kuipers",

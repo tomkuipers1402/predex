@@ -20,7 +20,7 @@ predex
 
 
 
-Prepare expression data for dgeAnalysis - LUMC
+Prepare data for expression analysis with e.g. dgeAnalysis - LUMC.
 
 
 * Free software: MIT license
