@@ -1,6 +1,6 @@
 """Console script for predex."""
 import sys
-import getopt
+import argparse
 
 import predex.designMatrix as designMatrix
 import predex.annoGenerator as annoGenerator
@@ -8,48 +8,34 @@ import predex.annoGenerator as annoGenerator
 
 """Start called task"""
 def main():
-    input_arg = sys.argv[1:]
-    get_arguments = read_arguments(input_arg)
+    check_args()
+
+
+def check_args():
+    parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
+    parser = argparse.ArgumentParser(description = "Prepare data for expression analysis with e.g. dgeAnalysis - LUMC.")
+    parser.add_argument("-v", "--version", action="version", version="%(prog)s 0.1.1")
+
+    subparser = parser.add_subparsers()
+
+    # design argument
+    a_parser = subparser.add_parser("design", help="Create design matrix template", formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
+    a_parser.set_defaults(func=designMatrix.main)
+    required = a_parser.add_argument_group('required arguments')
+    required.add_argument("-i", "--input", help="Input files (count matrix, e.g., HTSeq)", required=True)
+    required.add_argument("-o", "--output", help="Output directory", required=True)
+
+    # annotation argument
+    b_parser = subparser.add_parser("annotation", help="Create annotation file", formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
+    b_parser.set_defaults(func=annoGenerator.main)
+    required = b_parser.add_argument_group('required arguments')
+    required.add_argument("-f", "--fasta", help="Fasta file input", required=True)
+    required.add_argument("-g", "--gtf", help="GTF file input", required=True)
+    required.add_argument("-o", "--output", help="Output directory", required=True)
     
-    if (input_arg[0] == "design"):
-        if ("".join(sorted(get_arguments.keys())) == "io"):
-            designMatrix.main(get_arguments)
-        else:
-            print("Error: using wrong/missing arguments")
-    elif (input_arg[0] == "annotation"):
-        if ("".join(sorted(get_arguments.keys())) == "gor"):
-            annoGenerator.main(get_arguments)
-        else:
-            print("Error: using wrong/missing arguments")
-    else:
-        print("Error: Unkown call:", input_arg[0])
-        print(get_arguments)
+    args = parser.parse_args()
+    args.func(args)
 
 
-"""Retrieve all arguments from commandline."""
-def read_arguments(input_arg):
-    unixOptions = "i:r:g:o:"
-    gnuOptions = ["reference=", "gtf=", "input=", "output="]
-    dict_args = dict()
-
-    try:
-        arguments, values = getopt.getopt(input_arg[1:], unixOptions, gnuOptions)
-    except getopt.error as err:
-        # output error, and return with an error code
-        print(str(err))
-        sys.exit(2)
-        
-    for currentArgument, currentValue in arguments:
-        if currentArgument in ("-i", "--input"):
-            dict_args["i"] = currentValue
-        elif currentArgument in ("-r", "--reference"):
-            dict_args["r"] = currentValue
-        elif currentArgument in ("-g", "--gtf"):
-            dict_args["g"] = currentValue
-        elif currentArgument in ("-o", "--output"):
-            dict_args["o"] = currentValue
-    return dict_args
-
-
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+if __name__ == "__main__":    
+    main()
