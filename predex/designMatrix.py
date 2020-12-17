@@ -1,10 +1,6 @@
 #! /usr/local/bin/python3
 
 import sys
-import getopt
-
-unixOptions = "i:o:"
-gnuOptions = ["input=", "output="]
 
 
 # --------------------------------------------------------------------------
@@ -40,10 +36,10 @@ def createDesignMatrix(header):
 # ----- Start script and get arguments-----
 
 
-def main(get_arguments):
+def main(args):
     print("Running...")
-    inputFile = get_arguments["i"]
-    outputDir = get_arguments["o"]
+    inputFile = args.input
+    outputDir = args.output
 
     header = readCountTable(inputFile)
     designMatrix = createDesignMatrix(header)

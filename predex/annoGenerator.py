@@ -1,12 +1,9 @@
 #! /usr/local/bin/python37
 
 import sys
-import getopt
+import warnings # Required for pybedtools: sequence()
 import pybedtools
 import pandas as pd
-
-unixOptions = "r:g:o:"
-gnuOptions = ["reference=", "gtf=", "output="]
 
 
 # --------------------------------------------------------------------------
@@ -100,8 +97,10 @@ def getSequence(line, reference):
     if start != end:
         bed = pybedtools.BedTool(' '.join([contig, str(start), str(end)]), from_string=True)
         try:
+            warnings.simplefilter("ignore")
             bed = bed.sequence(fi=reference)
-            bed = open(bed.seqfn).readlines()[1].strip()
+            with open(bed.seqfn, "r") as openFile:
+                bed = openFile.readlines()[1].strip()
         except IndexError:
             bed = ""
     else:
@@ -161,11 +160,11 @@ def saveDataframe(df, outputDir):
 # --------------------------------------------------------------------------
 # ----- Start script and get arguments -----
 
-def main(get_arguments):
+def main(args):
     print("Running...")
-    reference = get_arguments["r"]
-    gtf = get_arguments["g"]
-    outputDir = get_arguments["o"]
+    reference = args.fasta
+    gtf = args.gtf
+    outputDir = args.output
 
     allGeneData = getGTF(reference, gtf)
     print("Saving data...")
