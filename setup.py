@@ -11,8 +11,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    "pandas==1.1.5",
-    "pybedtools==0.8.1"
+    "pandas",
+    "pybedtools"
 ]
 
 setup_requirements = [ ]
@@ -34,7 +34,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="Prepare expression data for dgeAnalysis - LUMC",
+    description="Prepare expression data for dgeAnalysis - LUMC.",
     entry_points={
         'console_scripts': [
             'predex=predex.cli:main',
@@ -51,6 +51,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/tomkuipers1402/predex',
-    version='0.1.1',
+    version='0.9.1',
     zip_safe=False,
 )
