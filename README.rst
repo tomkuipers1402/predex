@@ -25,9 +25,3 @@ Prepare data for expression analysis with e.g. dgeAnalysis - LUMC.
 
 * Free software: MIT license
 * Documentation: https://predex.readthedocs.io.
-
-
-Features
---------
-
-* TODO
