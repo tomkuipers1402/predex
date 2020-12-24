@@ -82,7 +82,7 @@ def get_geneInfo(line):
                int(line[4]),  # EndPos
                int(line[4]) - int(line[3]) + 1,  # Length
                str(line[6]),  # GeneStrand
-               str(''.join([s for s in line if "gene_biotype" in s]).split()[-1].strip('"'))]  # GeneType
+               str(''.join([s for s in line if "gene_" and "type" in s]).split()[-1].strip('"'))]  # GeneType
     return newGene
 
 
