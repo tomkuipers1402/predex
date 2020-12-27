@@ -37,7 +37,7 @@ def createDesignMatrix(header):
 
 
 def main(args):
-    print("Running...")
+    print("Start processing...")
     inputFile = args.input
     outputDir = args.output
 
