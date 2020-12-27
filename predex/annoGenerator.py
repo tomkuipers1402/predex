@@ -1,56 +1,72 @@
-#! /usr/local/bin/python37
+#!/usr/bin/python3
 
-import sys
-import warnings # Required for pybedtools: sequence()
-import pybedtools
+import queue
+import threading
+import pysam
 import pandas as pd
+
+
+allGeneData = dict()
+
+
+# --------------------------------------------------------------------------
+# ----- Monitor queue and threading -----
+
+class startGenerator(threading.Thread):
+    def __init__(self, queue):
+      threading.Thread.__init__(self)
+      self.queue = queue
+   
+    def run(self):
+        while not self.queue.empty():
+            reference, geneComplete = self.queue.get()
+            newGene = get_geneInfo(geneComplete[0])
+            gene_seq = getSequence(geneComplete[0], reference)
+            allGeneData[newGene[0]] = addNewGene(geneComplete[1:], gene_seq, newGene)
+            if len(allGeneData) % 5000 == 0:
+                print("\tProcessed", len(allGeneData), "genes")
+            self.queue.task_done()
 
 
 # --------------------------------------------------------------------------
 # ----- Read through gtf and call required functions -----
 
-
-def getGTF(reference, gtf):
-    newGene = list()
-    gene_seq = list()
-    exon_data = list()
-    allGeneData = dict()
-    reference = pybedtools.BedTool(reference)
-
+def readGTF(reference, gtf, threads):
+    geneComplete = list()
+    q = queue.Queue()
+    
     with open(gtf, "r") as openFile:
         for line in openFile:
             line = line.strip().replace('\t', ';').split(";")
             if line[0][0] == "#":
                 pass
             elif "gene" in line[2]:
-                allGeneData = addNewGene(exon_data, gene_seq, newGene, allGeneData)
-                newGene = get_geneInfo(line)
-                gene_seq = getSequence(line, reference)
-                exon_data = list()
-                if len(allGeneData) % 5000 == 0:
-                    print("\tProcessed", len(allGeneData), "genes")
+                if geneComplete:
+                    q.put([reference, geneComplete])
+                geneComplete = list()
+                geneComplete.append(line)
             elif "exon" in line[2]:
-                exon = [int(line[3])-newGene[3], int(line[4])-newGene[3]]
-                exon_data.append(exon)
-    allGeneData = addNewGene(exon_data, gene_seq, newGene, allGeneData)
-    return allGeneData
+                exon = [int(line[3])-int(geneComplete[0][3]), int(line[4])-int(geneComplete[0][3])]
+                geneComplete.append(exon)
+    q.put([reference, geneComplete])
+
+    for OneOf in range(threads):
+        thread = startGenerator(queue=q)
+        thread.start()
+    q.join()
 
 
 # --------------------------------------------------------------------------
 # ----- Call functions to gather exon data and merge all gene information -----
 
-
-def addNewGene(exon_data, gene_seq, newGene, allGeneData):
-    if exon_data and gene_seq != "":
-        exon_data = checkExonData(exon_data)
-        newGene = getExonIntron(newGene, gene_seq, exon_data)
-        allGeneData[newGene[0]] = newGene
-    return allGeneData
+def addNewGene(exon_data, gene_seq, newGene):
+    exon_data = checkExonData(exon_data)
+    newGene = getExonIntron(newGene, gene_seq, exon_data)
+    return newGene
 
 
 # --------------------------------------------------------------------------
 # ----- Create correct exon location without any overlap -----
-
 
 def checkExonData(exon_data):
     exon_data = sorted(exon_data)
@@ -68,13 +84,12 @@ def checkExonData(exon_data):
 # --------------------------------------------------------------------------
 # ----- Get gene data from gtf -----
 
-
 def get_geneInfo(line):
     try:
         geneSymbol = str(''.join([s for s in line if "gene_name" in s]).split()[-1].strip('"'))
     except IndexError as err:
         geneSymbol = str(''.join([s for s in line if "gene_id" in s]).split()[-1].strip('"'))
-        print("\t geneName unavailable for", geneSymbol + ", will use geneID instead")        
+        print("\t geneName unavailable for", geneSymbol + ", will use geneID instead")
     newGene = [str(''.join([s for s in line if "gene_id" in s]).split()[-1].strip('"')),  # GeneID
                str(geneSymbol),  # GeneSymbol
                str(line[0]),  # Contig
@@ -89,28 +104,21 @@ def get_geneInfo(line):
 # --------------------------------------------------------------------------
 # ----- Get gene sequence -----
 
-
-def getSequence(line, reference):
-    contig = str(line[0])
-    start = line[3]
-    end = line[4]
+def getSequence(gene, reference):
+    contig = str(gene[0])
+    start = int(gene[3])
+    end = int(gene[4])
     if start != end:
-        bed = pybedtools.BedTool(' '.join([contig, str(start), str(end)]), from_string=True)
-        try:
-            warnings.simplefilter("ignore")
-            bed = bed.sequence(fi=reference)
-            with open(bed.seqfn, "r") as openFile:
-                bed = openFile.readlines()[1].strip()
-        except IndexError:
-            bed = ""
+        genome = pysam.Fastafile(reference)
+        sequence = genome.fetch(contig, start, end)
+        genome.close()
     else:
-        bed = ""
-    return bed
+        sequence = ""
+    return sequence
 
 
 # --------------------------------------------------------------------------
 # ----- Get exon/intron data and add to gene data -----
-
 
 def getExonIntron(newGene, gene_seq, exon_data):
     exon_seq = ""
@@ -131,7 +139,6 @@ def getExonIntron(newGene, gene_seq, exon_data):
 # --------------------------------------------------------------------------
 # ----- Calculate GC content -----
 
-
 def getGCcontent(sequence):
     if len(sequence) == 0:
         gc = 0
@@ -142,7 +149,6 @@ def getGCcontent(sequence):
 
 # --------------------------------------------------------------------------
 # ----- Set column names and save dataframe as TSV -----
-
 
 def saveDataframe(df, outputDir):
     df.columns = ["feature", "geneName", "chromosome", "startPos", "endPos",
@@ -161,12 +167,17 @@ def saveDataframe(df, outputDir):
 # ----- Start script and get arguments -----
 
 def main(args):
-    print("Running...")
+    print("Start processing...")
+    print("\tProcessed 0 genes")
+
     reference = args.fasta
     gtf = args.gtf
     outputDir = args.output
+    threads = args.threads
 
-    allGeneData = getGTF(reference, gtf)
+    readGTF(reference, gtf, threads)
+    print("Processed", len(allGeneData), "genes")
+
     print("Saving data...")
     df = pd.DataFrame.from_dict(allGeneData, orient="index")
     df.columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
