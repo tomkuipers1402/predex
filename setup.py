@@ -12,7 +12,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     "pandas",
-    "pybedtools"
+    "pysam"
 ]
 
 setup_requirements = [ ]
@@ -22,7 +22,7 @@ test_requirements = [ ]
 setup(
     author="Tom Kuipers",
     author_email='t.b.kuipers@lumc.nl',
-    python_requires='>=3.7',
+    python_requires='>3',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -51,6 +51,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/tomkuipers1402/predex',
-    version='1.0.1',
+    version='0.9.2',
     zip_safe=False,
 )
