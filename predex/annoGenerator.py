@@ -50,7 +50,7 @@ def readGTF(reference, gtf, threads):
                 geneComplete.append(exon)
     q.put([reference, geneComplete])
 
-    for OneOf in range(threads):
+    for OneOf in range(int(threads)):
         thread = startGenerator(queue=q)
         thread.start()
     q.join()
