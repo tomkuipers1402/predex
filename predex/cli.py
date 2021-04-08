@@ -5,6 +5,7 @@ import argparse
 import predex.designMatrix as designMatrix
 import predex.annoGenerator as annoGenerator
 import predex.createComparisons as createComparisons
+import predex.processIPAresults as processIPAresults
 
 
 """Start called task"""
@@ -42,6 +43,14 @@ def check_args():
     required.add_argument("-d", "--design", help="Design matrix with sample data", required=True)
     required.add_argument("-c", "--column", help="Column name to make comparisons with", required=True)
     required.add_argument("-o", "--output", help="Output directory", required=True)
+
+    # IPA output arguments
+    d_parser = subparser.add_parser("ipa", help="Process IPA output in tidy tsv format", formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
+    d_parser.set_defaults(func=processIPAresults.main)
+    required = d_parser.add_argument_group('required arguments')
+    required.add_argument("-i", "--input", help="Input dir with IPA downloaded table", required=True)
+    required.add_argument("-o", "--output", help="Output dir to write processed data to", required=True)
+    required.add_argument("-e", "--extension", help="Extension of IPA files (default = .txt)", default=".txt")
 
     args = parser.parse_args()
     args.func(args)
