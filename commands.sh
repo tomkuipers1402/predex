@@ -7,7 +7,7 @@
 
 ## Upload to pypi (navigate to right dir)
     # python setup.py sdist
-    # twine upload dist/*
+    # twine upload dist/predex-0.9.2.tar.gz
 
 ## Conda package
     # conda skeleton pypi predex
