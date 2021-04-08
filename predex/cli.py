@@ -25,7 +25,7 @@ def check_args():
     a_parser.set_defaults(func=designMatrix.main)
     required = a_parser.add_argument_group('required arguments')
     required.add_argument("-i", "--input", help="Input files (count matrix, e.g., HTSeq)", required=True)
-    required.add_argument("-o", "--output", help="Output directory", required=True)
+    required.add_argument("-o", "--output", help="Output directory (default = current)", default=".")
 
     # annotation arguments
     b_parser = subparser.add_parser("annotation", help="Create annotation file", formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
@@ -34,7 +34,7 @@ def check_args():
     required = b_parser.add_argument_group('required arguments')
     required.add_argument("-f", "--fasta", help="Fasta file input", required=True)
     required.add_argument("-g", "--gtf", help="GTF file input", required=True)
-    required.add_argument("-o", "--output", help="Output directory", required=True)    
+    required.add_argument("-o", "--output", help="Output directory (default = current)", default=".")
     
     # comparisons arguments
     c_parser = subparser.add_parser("comparison", help="Create comparisons for looped analysis", formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
@@ -42,14 +42,14 @@ def check_args():
     required = c_parser.add_argument_group('required arguments')
     required.add_argument("-d", "--design", help="Design matrix with sample data", required=True)
     required.add_argument("-c", "--column", help="Column name to make comparisons with", required=True)
-    required.add_argument("-o", "--output", help="Output directory", required=True)
+    required.add_argument("-o", "--output", help="Output directory (default = current)", default=".")
 
     # IPA output arguments
     d_parser = subparser.add_parser("ipa", help="Process IPA output in tidy tsv format", formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
     d_parser.set_defaults(func=processIPAresults.main)
     required = d_parser.add_argument_group('required arguments')
     required.add_argument("-i", "--input", help="Input dir with IPA downloaded table", required=True)
-    required.add_argument("-o", "--output", help="Output dir to write processed data to", required=True)
+    required.add_argument("-o", "--output", help="Output dir to write processed data to (default = current)", default=".")
     required.add_argument("-e", "--extension", help="Extension of IPA files (default = .txt)", default=".txt")
 
     args = parser.parse_args()
