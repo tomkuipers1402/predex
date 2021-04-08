@@ -6,7 +6,6 @@ import sys
 # --------------------------------------------------------------------------
 # ----- Read & write -----
 
-
 def readCountTable(inputFile):
     with open(inputFile, "r") as countTable:
         header = countTable.readline().strip().split()[1:]
@@ -22,7 +21,6 @@ def writeDesignMatrix(designMatrix, outputDir):
 # --------------------------------------------------------------------------
 # ----- Create sample sheet based on headers from count table -----
 
-
 def createDesignMatrix(header):
     designMatrix = list()
     designMatrix.append(['sampleID', 'groupID', 'sex', 'phenotype'])
@@ -34,7 +32,6 @@ def createDesignMatrix(header):
 
 # --------------------------------------------------------------------------
 # ----- Start script and get arguments-----
-
 
 def main(args):
     print("Start processing...")

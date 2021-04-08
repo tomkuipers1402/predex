@@ -51,6 +51,7 @@ def readInputFiles(designPath, compare):
 
     return unique
 
+
 # --------------------------------------------------------------------------
 # ----- Load input and call functions -----
 
