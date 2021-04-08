@@ -16,7 +16,7 @@ def main():
 def check_args():
     parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=50))
     parser = argparse.ArgumentParser(description = "Prepare data for expression analysis with e.g. dgeAnalysis - LUMC.")
-    parser.add_argument("-v", "--version", action="version", version="%(prog)s 0.9.2")
+    parser.add_argument("-v", "--version", action="version", version="%(prog)s 0.9.3")
 
     subparser = parser.add_subparsers()
 
